@@ -64,8 +64,8 @@ ThreadKeep is a no-code/low-code AI agent built on n8n + Claude API. It ingests 
 ## n8n Workflow Structure
 
 ```
-Gmail (omshubham99) ──► Set Gmail Label ──────────────────────┐
-Gmail (shubhamo26)  ──► Set Gmail Label2 ─────────────────────┤
+Gmail-1 ──► Set Gmail Label ──────────────────────┐
+Gmail-2  ──► Set Gmail Label2 ─────────────────────┤
                                                                ▼
 WhatsApp webhook ──► IF (SimSim?) ──► TRUE ──► Fetch Sheets ──► Code (format) ──► GREEN-API reply
                          │
