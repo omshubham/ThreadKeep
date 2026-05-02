@@ -1,0 +1,33 @@
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.key
+secrets.json
+
+# n8n local data
+.n8n/
+n8n-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Node (if any scripts added later)
+node_modules/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp

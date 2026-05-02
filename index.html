@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ThreadKeep — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  [data-theme="dark"] {
+    --bg:#0f0f12;--surface:#1a1a1f;--surface2:#22222a;--border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);
+    --text:#f2efe9;--text2:#c8c4bc;--muted:#888890;--accent:#8B74FF;--accent-dim:rgba(139,116,255,0.15);
+    --task:#5BA4F5;--task-bg:rgba(91,164,245,0.15);--meeting:#A78BFA;--meeting-bg:rgba(167,139,250,0.15);
+    --commitment:#34D399;--commitment-bg:rgba(52,211,153,0.15);--blocker:#F87171;--blocker-bg:rgba(248,113,113,0.15);
+    --decision:#FBBF24;--decision-bg:rgba(251,191,36,0.15);--fyi:#94A3B8;--fyi-bg:rgba(148,163,184,0.12);
+    --high:#F87171;--medium:#FBBF24;--low:#34D399;--grid:rgba(255,255,255,0.025);--card-hover:#1e1e26;
+  }
+  [data-theme="light"] {
+    --bg:#f0f0f5;--surface:#ffffff;--surface2:#e8e8f0;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.16);
+    --text:#111118;--text2:#3a3a4a;--muted:#6b6b80;--accent:#6B52F0;--accent-dim:rgba(107,82,240,0.1);
+    --task:#2563EB;--task-bg:rgba(37,99,235,0.1);--meeting:#7C3AED;--meeting-bg:rgba(124,58,237,0.1);
+    --commitment:#059669;--commitment-bg:rgba(5,150,105,0.1);--blocker:#DC2626;--blocker-bg:rgba(220,38,38,0.1);
+    --decision:#D97706;--decision-bg:rgba(217,119,6,0.1);--fyi:#64748B;--fyi-bg:rgba(100,116,139,0.1);
+    --high:#DC2626;--medium:#D97706;--low:#059669;--grid:rgba(0,0,0,0.03);--card-hover:#f5f5fc;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;transition:background 0.3s,color 0.3s;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;position:relative;z-index:1;}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:0.5px solid var(--border);flex-wrap:wrap;gap:12px;}
+  .logo{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:var(--text);}
+  .logo span{color:var(--accent);}
+  .tagline{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.08em;margin-top:3px;}
+  .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .live-badge{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--commitment);background:var(--commitment-bg);padding:5px 10px;border-radius:20px;border:0.5px solid var(--commitment);opacity:.9;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--commitment);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .icon-btn{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);background:var(--surface);border:0.5px solid var(--border2);padding:6px 12px;border-radius:8px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .icon-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--accent);}
+  .icon-btn.privacy-active{background:var(--blocker-bg);color:var(--blocker);border-color:var(--blocker);}
+  .last-updated{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.75rem;}
+  .stat{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;transition:border-color 0.2s;}
+  .stat:hover{border-color:var(--border2);}
+  .stat-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-bottom:6px;text-transform:uppercase;}
+  .stat-value{font-size:30px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1;transition:filter 0.2s;}
+  .stat-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+  .stat-closed .stat-value{color:var(--commitment);}
+  .controls{display:flex;gap:10px;margin-bottom:1rem;align-items:center;flex-wrap:wrap;}
+  .search-wrap{flex:1;min-width:200px;position:relative;}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none;}
+  .search{width:100%;background:var(--surface);border:0.5px solid var(--border2);border-radius:8px;padding:9px 12px 9px 34px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;transition:border-color 0.15s;}
+  .search:focus{border-color:var(--accent);}
+  .search::placeholder{color:var(--muted);}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;}
+  .filter-btn{font-family:'DM Mono',monospace;font-size:11px;padding:6px 12px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .filter-btn:hover{border-color:var(--accent);color:var(--text);}
+  .filter-btn.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);}
+  .filter-closed{border-style:dashed !important;}
+  .filter-closed.closed-active{background:var(--commitment-bg) !important;color:var(--commitment) !important;border-color:var(--commitment) !important;border-style:solid !important;}
+  .count-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .count-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.05em;}
+  .signals{display:flex;flex-direction:column;gap:6px;}
+  .signal-card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:110px 1fr auto;gap:14px;align-items:center;transition:all 0.15s;animation:fadeIn 0.25s ease both;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .signal-card:hover{border-color:var(--border2);background:var(--card-hover);}
+  .signal-card.closed{opacity:0.4;}
+  .signal-card.closed .signal-summary{text-decoration:line-through;color:var(--muted);}
+  .signal-left{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+  .type-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;letter-spacing:0.04em;white-space:nowrap;}
+  .type-TASK{background:var(--task-bg);color:var(--task);}
+  .type-MEETING{background:var(--meeting-bg);color:var(--meeting);}
+  .type-COMMITMENT{background:var(--commitment-bg);color:var(--commitment);}
+  .type-BLOCKER{background:var(--blocker-bg);color:var(--blocker);border:0.5px solid var(--blocker);}
+  .type-DECISION{background:var(--decision-bg);color:var(--decision);}
+  .type-FYI{background:var(--fyi-bg);color:var(--fyi);}
+  .priority-badge{font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;gap:5px;color:var(--muted);}
+  .priority-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .p-high{background:var(--high);}
+  .p-medium{background:var(--medium);}
+  .p-low{background:var(--low);}
+  .check-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);transition:all 0.2s;flex-shrink:0;}
+  .check-btn:hover{border-color:var(--commitment);color:var(--commitment);background:var(--commitment-bg);}
+  .check-btn.checked{border-color:var(--commitment);background:var(--commitment);color:#fff;}
+  .signal-body{min-width:0;}
+  .signal-summary{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4;transition:filter 0.2s;}
+  .signal-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
+  .capsule{display:inline-flex;align-items:center;border-radius:20px;overflow:hidden;font-family:'DM Mono',monospace;font-size:11px;transition:filter 0.2s;}
+  .capsule-label{font-size:9px;font-weight:500;letter-spacing:0.08em;padding:3px 6px;}
+  .capsule-val{padding:3px 8px 3px 4px;font-size:11px;}
+  .capsule-from{background:rgba(139,116,255,0.1);}
+  .capsule-from .capsule-label{background:rgba(139,116,255,0.3);color:var(--accent);}
+  .capsule-from .capsule-val{color:var(--text2);}
+  .capsule-for{background:rgba(91,164,245,0.1);}
+  .capsule-for .capsule-label{background:rgba(91,164,245,0.3);color:var(--task);}
+  .capsule-for .capsule-val{color:var(--text2);}
+  .capsule-due{background:rgba(248,113,113,0.1);}
+  .capsule-due .capsule-label{background:rgba(248,113,113,0.3);color:var(--blocker);}
+  .capsule-due .capsule-val{color:var(--text2);}
+  .signal-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:90px;}
+  .source-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.03em;text-align:center;}
+  .src-slack{background:var(--meeting-bg);color:var(--meeting);}
+  .src-gmail{background:var(--blocker-bg);color:var(--blocker);}
+  .src-whatsapp{background:var(--commitment-bg);color:var(--commitment);}
+  .timestamp{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;transition:filter 0.2s;}
+  body.privacy .signal-summary{filter:blur(5px);user-select:none;}
+  body.privacy .capsule{filter:blur(4px);user-select:none;}
+  body.privacy .timestamp{filter:blur(4px);user-select:none;}
+  body.privacy .stat-value{filter:blur(6px);user-select:none;}
+  /* ── TOOLTIPS ── */
+  .stat-wrap{position:relative;}
+  .info-btn{width:16px;height:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:5px;vertical-align:middle;font-family:'DM Mono',monospace;transition:all 0.15s;flex-shrink:0;}
+  .info-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f2efe9;font-family:'DM Mono',monospace;font-size:11px;padding:8px 12px;border-radius:8px;white-space:nowrap;z-index:100;pointer-events:none;opacity:0;transition:opacity 0.15s;border:0.5px solid rgba(139,116,255,0.3);line-height:1.5;}
+  [data-theme="light"] .tooltip{background:#2a2a3e;}
+  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e;}
+  .stat-wrap:hover .tooltip{opacity:1;}
+
+  /* ── UNDO BANNER ── */
+  .undo-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f2efe9;font-family:'DM Mono',monospace;font-size:12px;padding:12px 20px;border-radius:10px;border:0.5px solid rgba(139,116,255,0.4);display:flex;align-items:center;gap:14px;z-index:999;box-shadow:0 4px 24px rgba(0,0,0,0.4);animation:slideUp 0.3s ease;}
+  @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+  .undo-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:opacity 0.15s;}
+  .undo-btn:hover{opacity:0.85;}
+  .undo-progress{height:3px;background:rgba(255,255,255,0.15);border-radius:2px;position:absolute;bottom:0;left:0;right:0;border-radius:0 0 10px 10px;overflow:hidden;}
+  .undo-progress-bar{height:100%;background:var(--accent);transition:width linear;}
+
+  .state-box{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:3rem;text-align:center;}
+  .state-box h3{font-size:16px;color:var(--text);margin-bottom:8px;}
+  .state-box p{font-size:13px;line-height:1.6;color:var(--text2);}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(3,1fr);}.signal-card{grid-template-columns:1fr;}.signal-right{align-items:flex-start;flex-direction:row;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <div class="logo">Thread<span>Keep</span></div>
+      <div class="tagline">keep every thread accountable</div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge"><div class="live-dot"></div>live &middot; 2 min</div>
+      <button class="icon-btn" onclick="fetchData()">&#8635; refresh</button>
+      <button class="icon-btn" id="mark-all-btn" onclick="markAllClosed()">&#10003;&#10003; mark all done</button>
+      <button class="icon-btn" id="privacy-btn" onclick="togglePrivacy()">&#128274; privacy</button>
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">&#9728; light</button>
+      <div class="last-updated" id="last-updated">&mdash;</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat stat-wrap">
+      <div class="tooltip">Every work signal extracted from Gmail,<br/>Slack &amp; WhatsApp — tasks, decisions,<br/>meetings, blockers, FYIs combined.</div>
+      <div class="stat-label">total signals <button class="info-btn">i</button></div>
+      <div class="stat-value" id="s-total">&mdash;</div><div class="stat-sub">active, all channels</div>
+    </div>
+    <div class="stat stat-wrap">
+      <div class="tooltip">Messages where someone was asked<br/>to DO something — with a clear<br/>action item and often a deadline.</div>
+      <div class="stat-label">open tasks <button class="info-btn">i</button></div>
+      <div class="stat-value" id="s-tasks">&mdash;</div><div class="stat-sub">need action</div>
+    </div>
+    <div class="stat stat-wrap">
+      <div class="tooltip">Signals marked HIGH priority — usually<br/>contain words like urgent, ASAP,<br/>EOD, jaldi, or today.</div>
+      <div class="stat-label">high priority <button class="info-btn">i</button></div>
+      <div class="stat-value" id="s-high">&mdash;</div><div class="stat-sub">urgent items</div>
+    </div>
+    <div class="stat stat-wrap">
+      <div class="tooltip">Something is actively BLOCKING work<br/>from moving forward — missing access,<br/>waiting on someone, stuck.</div>
+      <div class="stat-label">blockers <button class="info-btn">i</button></div>
+      <div class="stat-value" id="s-blockers">&mdash;</div><div class="stat-sub">need resolution</div>
+    </div>
+    <div class="stat stat-closed stat-wrap">
+      <div class="tooltip">Signals you have manually marked<br/>as done. They are hidden from<br/>the main view by default.</div>
+      <div class="stat-label">closed <button class="info-btn">i</button></div>
+      <div class="stat-value" id="s-closed">0</div><div class="stat-sub">resolved signals</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">&#9906;</span>
+      <input class="search" id="search" placeholder="search signals, people, sources..." oninput="render()"/>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('ALL',this)">all</button>
+      <button class="filter-btn" onclick="setFilter('TASK',this)">tasks</button>
+      <button class="filter-btn" onclick="setFilter('MEETING',this)">meetings</button>
+      <button class="filter-btn" onclick="setFilter('COMMITMENT',this)">commitments</button>
+      <button class="filter-btn" onclick="setFilter('BLOCKER',this)">blockers</button>
+      <button class="filter-btn" onclick="setFilter('DECISION',this)">decisions</button>
+      <button class="filter-btn" onclick="setFilter('FYI',this)">fyi</button>
+      <button class="filter-btn filter-closed" id="show-closed-btn" onclick="toggleShowClosed(this)">show closed</button>
+    </div>
+  </div>
+
+  <div class="count-bar">
+    <div class="count-label" id="count-label">connecting...</div>
+  </div>
+
+  <div class="signals" id="signals">
+    <div class="state-box">
+      <h3>connecting to ThreadKeep...</h3>
+      <p>Make sure n8n is running on your laptop.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var allData = [];
+var activeFilter = 'ALL';
+var N8N_URL = 'https://n8n-production-2506.up.railway.app/webhook/threadkeep-data';
+var N8N_STATUS_URL = 'https://n8n-production-2506.up.railway.app/webhook/threadkeep-status';
+var autoRefreshInterval = null;
+var privacyOn = false;
+var theme = 'dark';
+var showClosed = false;
+var closedIds = {};
+
+fetchData();
+startAutoRefresh();
+
+function startAutoRefresh() {
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  autoRefreshInterval = setInterval(fetchData, 120000);
+}
+
+function fetchData() {
+  document.getElementById('count-label').textContent = 'fetching...';
+  fetch(N8N_URL)
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      var rows = Array.isArray(data) ? data : [];
+      allData = rows.map(function(row, idx) {
+        var sheetId = (row.ID || '').trim();
+        var id = sheetId || ('sig' + idx); // fallback for old rows without ID
+        var status = (row.Status || '').toLowerCase().trim();
+        if (status === 'closed') closedIds[id] = true;
+        return {
+          _id: id,
+          type: (row.Type || '').toUpperCase(),
+          summary: row.Summary || '',
+          person: row.Person || 'unspecified',
+          deadline: row.Deadline || null,
+          priority: (row.Priority || 'low').toLowerCase(),
+          confidence: (row.Confidence || 'low').toLowerCase(),
+          source: row.Source || 'unknown',
+          sender: row.Sender || 'unknown',
+          timestamp: row.Timestamp || ''
+        };
+      }).filter(function(d) { return d.type && d.summary; });
+      var now = new Date();
+      document.getElementById('last-updated').textContent = 'updated ' + now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+      render();
+    })
+    .catch(function(err) {
+      document.getElementById('signals').innerHTML = '<div class="state-box"><h3>could not connect</h3><p>Make sure n8n is running and the workflow is active.<br/><br/><small style="color:var(--muted)">' + err.message + '</small></p></div>';
+      document.getElementById('count-label').textContent = 'connection error';
+    });
+}
+
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').innerHTML = theme === 'dark' ? '&#9728; light' : '&#127769; dark';
+}
+
+function togglePrivacy() {
+  privacyOn = !privacyOn;
+  document.body.classList.toggle('privacy', privacyOn);
+  var btn = document.getElementById('privacy-btn');
+  btn.innerHTML = privacyOn ? '&#128275; reveal' : '&#128274; privacy';
+  btn.classList.toggle('privacy-active', privacyOn);
+}
+
+function toggleClose(id) {
+  var newStatus = closedIds[id] ? 'open' : 'closed';
+  closedIds[id] = !closedIds[id];
+  render();
+  // Sync to Google Sheets via n8n
+  fetch(N8N_STATUS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id, status: newStatus })
+  }).catch(function(err) {
+    console.warn('Status sync failed:', err);
+  });
+}
+
+function toggleShowClosed(btn) {
+  showClosed = !showClosed;
+  btn.classList.toggle('closed-active', showClosed);
+  render();
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  render();
+}
+
+function getSourceClass(src) {
+  if (!src) return 'src-whatsapp';
+  var s = src.toLowerCase();
+  if (s.includes('slack')) return 'src-slack';
+  if (s.includes('gmail') || s.includes('mail') || s.includes('@')) return 'src-gmail';
+  return 'src-whatsapp';
+}
+
+function formatDeadline(raw) {
+  if (!raw) return raw;
+  var s = raw.toLowerCase().trim();
+  if (s === 'not mentioned' || s === 'null' || s === '') return null;
+  if (s.startsWith('today')) { var t = extractTime(raw); return 'Today' + (t ? ' at ' + t : ''); }
+  if (s.startsWith('tomorrow')) { var t = extractTime(raw); return 'Tomorrow' + (t ? ' at ' + t : ''); }
+  var d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  var now = new Date();
+  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var tomorrowStart = new Date(todayStart.getTime() + 86400000);
+  var dStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+  var timeStr = hasTime ? ' at ' + fmtTime(d) : '';
+  if (dStart.getTime() === todayStart.getTime()) return 'Today' + timeStr;
+  if (dStart.getTime() === tomorrowStart.getTime()) return 'Tomorrow' + timeStr;
+  var diff = (dStart.getTime() - todayStart.getTime()) / 86400000;
+  if (diff > 0 && diff <= 6) return days[d.getDay()] + timeStr;
+  return d.getDate() + ' ' + months[d.getMonth()] + timeStr;
+}
+
+function extractTime(str) {
+  var m = str.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)/i);
+  if (!m) return null;
+  var h = parseInt(m[1]);
+  var mins = m[2] ? ':' + m[2] : '';
+  return h + mins + ' ' + m[3].toUpperCase();
+}
+
+function fmtTime(d) {
+  var h = d.getHours(); var m = d.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + (m > 0 ? ':' + String(m).padStart(2,'0') : '') + ' ' + ampm;
+}
+
+function render() {
+  var search = (document.getElementById('search').value || '').toLowerCase();
+  var activeData = allData.filter(function(d) { return !closedIds[d._id]; });
+
+  document.getElementById('s-total').textContent = activeData.length;
+  document.getElementById('s-tasks').textContent = activeData.filter(function(d){return d.type==='TASK';}).length;
+  document.getElementById('s-high').textContent = activeData.filter(function(d){return d.priority==='high';}).length;
+  document.getElementById('s-blockers').textContent = activeData.filter(function(d){return d.type==='BLOCKER';}).length;
+  document.getElementById('s-closed').textContent = allData.filter(function(d){return closedIds[d._id];}).length;
+
+  var filtered = allData.filter(function(d) {
+    var isClosed = closedIds[d._id];
+    if (isClosed && !showClosed) return false;
+    var matchType = activeFilter === 'ALL' || d.type === activeFilter;
+    var matchSearch = !search ||
+      d.summary.toLowerCase().includes(search) ||
+      (d.person && d.person.toLowerCase().includes(search)) ||
+      (d.sender && d.sender.toLowerCase().includes(search)) ||
+      (d.source && d.source.toLowerCase().includes(search));
+    return matchType && matchSearch;
+  });
+
+  document.getElementById('count-label').textContent = filtered.length + ' signal' + (filtered.length !== 1 ? 's' : '');
+
+  if (filtered.length === 0) {
+    document.getElementById('signals').innerHTML = '<div class="state-box"><h3>no signals found</h3><p>Try a different filter or search term.</p></div>';
+    return;
+  }
+
+  var html = '';
+  filtered.slice().reverse().forEach(function(d, i) {
+    var isClosed = !!closedIds[d._id];
+    var srcClass = getSourceClass(d.source);
+    var dl = d.deadline && d.deadline !== 'not mentioned' && d.deadline !== 'null' && d.deadline !== '' ? formatDeadline(d.deadline) : null;
+    var delay = Math.min(i * 0.025, 0.25);
+    var cardCls = 'signal-card' + (isClosed ? ' closed' : '');
+    var btnCls = 'check-btn' + (isClosed ? ' checked' : '');
+    var btnIcon = isClosed ? '&#10003;' : '';
+    var btnTitle = isClosed ? 'Reopen' : 'Mark as done';
+
+    html += '<div class="' + cardCls + '" style="animation-delay:' + delay + 's">';
+    html += '<div class="signal-left">';
+    html += '<span class="type-badge type-' + d.type + '">' + d.type + '</span>';
+    html += '<span class="priority-badge"><span class="priority-dot p-' + d.priority + '"></span>' + d.priority + '</span>';
+    html += '<button class="' + btnCls + '" onclick="toggleClose(\'' + d._id + '\')" title="' + btnTitle + '">' + btnIcon + '</button>';
+    html += '</div>';
+    html += '<div class="signal-body">';
+    html += '<div class="signal-summary">' + escHtml(d.summary) + '</div>';
+    html += '<div class="signal-meta">';
+    if (d.sender && d.sender !== 'unknown') html += '<span class="capsule capsule-from"><span class="capsule-label">FROM</span><span class="capsule-val">' + escHtml(d.sender) + '</span></span>';
+    if (d.person && d.person !== 'unspecified') html += '<span class="capsule capsule-for"><span class="capsule-label">FOR</span><span class="capsule-val">' + escHtml(d.person) + '</span></span>';
+    if (dl) html += '<span class="capsule capsule-due"><span class="capsule-label">DUE</span><span class="capsule-val">' + escHtml(dl) + '</span></span>';
+    html += '</div></div>';
+    html += '<div class="signal-right">';
+    html += '<span class="source-badge ' + srcClass + '">' + escHtml(d.source) + '</span>';
+    if (d.timestamp) html += '<span class="timestamp">' + escHtml(d.timestamp) + '</span>';
+    html += '</div></div>';
+  });
+  document.getElementById('signals').innerHTML = html;
+}
+
+var undoTimer = null;
+var undoSnapshot = null;
+var undoProgressTimer = null;
+
+function markAllClosed() {
+  var activeData = allData.filter(function(d) { return !closedIds[d._id]; });
+  if (activeData.length === 0) return;
+
+  // Save snapshot for undo
+  undoSnapshot = JSON.parse(JSON.stringify(closedIds));
+
+  // Close all active
+  activeData.forEach(function(d) { closedIds[d._id] = true; });
+  render();
+
+  // Sync all to Sheets
+  activeData.forEach(function(d) {
+    fetch(N8N_STATUS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: d._id, status: 'closed' })
+    }).catch(function(err) { console.warn('Status sync failed:', err); });
+  });
+
+  // Show undo banner
+  showUndoBanner(activeData.length);
+}
+
+function showUndoBanner(count) {
+  // Remove existing banner if any
+  var old = document.getElementById('undo-banner');
+  if (old) old.remove();
+  if (undoTimer) clearTimeout(undoTimer);
+  if (undoProgressTimer) clearInterval(undoProgressTimer);
+
+  var banner = document.createElement('div');
+  banner.className = 'undo-banner';
+  banner.id = 'undo-banner';
+  banner.innerHTML = '<span>' + count + ' signals marked done</span><button class="undo-btn" onclick="undoMarkAll()">Undo</button><div class="undo-progress"><div class="undo-progress-bar" id="undo-bar" style="width:100%"></div></div>';
+  document.body.appendChild(banner);
+
+  // Animate progress bar over 10 seconds
+  var start = Date.now();
+  var duration = 10000;
+  undoProgressTimer = setInterval(function() {
+    var elapsed = Date.now() - start;
+    var pct = Math.max(0, 100 - (elapsed / duration * 100));
+    var bar = document.getElementById('undo-bar');
+    if (bar) bar.style.width = pct + '%';
+    if (elapsed >= duration) clearInterval(undoProgressTimer);
+  }, 50);
+
+  // Auto-dismiss after 10 seconds
+  undoTimer = setTimeout(function() {
+    var b = document.getElementById('undo-banner');
+    if (b) b.remove();
+    undoSnapshot = null;
+  }, duration);
+}
+
+function undoMarkAll() {
+  if (undoSnapshot !== null) {
+    // Find which IDs were just closed (not in old snapshot) — reopen them
+    var prevSnapshot = undoSnapshot;
+    Object.keys(closedIds).forEach(function(id) {
+      if (closedIds[id] && !prevSnapshot[id]) {
+        fetch(N8N_STATUS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, status: 'open' })
+        }).catch(function(err) { console.warn('Status sync failed:', err); });
+      }
+    });
+    closedIds = prevSnapshot;
+    undoSnapshot = null;
+  }
+  if (undoTimer) clearTimeout(undoTimer);
+  if (undoProgressTimer) clearInterval(undoProgressTimer);
+  var b = document.getElementById('undo-banner');
+  if (b) b.remove();
+  render();
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
