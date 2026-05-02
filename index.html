@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ThreadKeep — Dashboard</title>
+<title>ThreadKeep — Demo Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   [data-theme="dark"] {
@@ -26,6 +27,7 @@
   body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;transition:background 0.3s,color 0.3s;}
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
   .container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;position:relative;z-index:1;}
+  .demo-banner{background:var(--accent-dim);border:0.5px solid var(--accent);border-radius:8px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-align:center;margin-bottom:1.5rem;letter-spacing:0.05em;}
   .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:0.5px solid var(--border);flex-wrap:wrap;gap:12px;}
   .logo{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:var(--text);}
   .logo span{color:var(--accent);}
@@ -42,7 +44,7 @@
   .stat{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;transition:border-color 0.2s;}
   .stat:hover{border-color:var(--border2);}
   .stat-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-bottom:6px;text-transform:uppercase;}
-  .stat-value{font-size:30px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1;transition:filter 0.2s;}
+  .stat-value{font-size:30px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1;}
   .stat-sub{font-size:12px;color:var(--muted);margin-top:5px;}
   .stat-closed .stat-value{color:var(--commitment);}
   .controls{display:flex;gap:10px;margin-bottom:1rem;align-items:center;flex-wrap:wrap;}
@@ -82,9 +84,9 @@
   .check-btn:hover{border-color:var(--commitment);color:var(--commitment);background:var(--commitment-bg);}
   .check-btn.checked{border-color:var(--commitment);background:var(--commitment);color:#fff;}
   .signal-body{min-width:0;}
-  .signal-summary{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4;transition:filter 0.2s;}
+  .signal-summary{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;line-height:1.4;}
   .signal-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
-  .capsule{display:inline-flex;align-items:center;border-radius:20px;overflow:hidden;font-family:'DM Mono',monospace;font-size:11px;transition:filter 0.2s;}
+  .capsule{display:inline-flex;align-items:center;border-radius:20px;overflow:hidden;font-family:'DM Mono',monospace;font-size:11px;}
   .capsule-label{font-size:9px;font-weight:500;letter-spacing:0.08em;padding:3px 6px;}
   .capsule-val{padding:3px 8px 3px 4px;font-size:11px;}
   .capsule-from{background:rgba(139,116,255,0.1);}
@@ -97,80 +99,65 @@
   .capsule-due .capsule-label{background:rgba(248,113,113,0.3);color:var(--blocker);}
   .capsule-due .capsule-val{color:var(--text2);}
   .signal-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:90px;}
-  .source-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.03em;text-align:center;}
+  .source-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;}
   .src-slack{background:var(--meeting-bg);color:var(--meeting);}
   .src-gmail{background:var(--blocker-bg);color:var(--blocker);}
   .src-whatsapp{background:var(--commitment-bg);color:var(--commitment);}
-  .timestamp{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;transition:filter 0.2s;}
+  .timestamp{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;text-align:right;}
+  .state-box{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:3rem;text-align:center;}
+  .undo-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f2efe9;font-family:'DM Mono',monospace;font-size:12px;padding:12px 20px;border-radius:10px;border:0.5px solid rgba(139,116,255,0.4);display:flex;align-items:center;gap:14px;z-index:999;box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+  .undo-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;}
+  .undo-progress{height:3px;background:rgba(255,255,255,0.15);border-radius:2px;position:absolute;bottom:0;left:0;right:0;overflow:hidden;}
+  .undo-progress-bar{height:100%;background:var(--accent);}
   body.privacy .signal-summary{filter:blur(5px);user-select:none;}
   body.privacy .capsule{filter:blur(4px);user-select:none;}
   body.privacy .timestamp{filter:blur(4px);user-select:none;}
   body.privacy .stat-value{filter:blur(6px);user-select:none;}
-  /* ── TOOLTIPS ── */
-  .stat-wrap{position:relative;}
-  .info-btn{width:16px;height:16px;border-radius:50%;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:5px;vertical-align:middle;font-family:'DM Mono',monospace;transition:all 0.15s;flex-shrink:0;}
-  .info-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f2efe9;font-family:'DM Mono',monospace;font-size:11px;padding:8px 12px;border-radius:8px;white-space:nowrap;z-index:100;pointer-events:none;opacity:0;transition:opacity 0.15s;border:0.5px solid rgba(139,116,255,0.3);line-height:1.5;}
-  [data-theme="light"] .tooltip{background:#2a2a3e;}
-  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e;}
-  .stat-wrap:hover .tooltip{opacity:1;}
-
-  /* ── UNDO BANNER ── */
-  .undo-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#f2efe9;font-family:'DM Mono',monospace;font-size:12px;padding:12px 20px;border-radius:10px;border:0.5px solid rgba(139,116,255,0.4);display:flex;align-items:center;gap:14px;z-index:999;box-shadow:0 4px 24px rgba(0,0,0,0.4);animation:slideUp 0.3s ease;}
-  @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-  .undo-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:opacity 0.15s;}
-  .undo-btn:hover{opacity:0.85;}
-  .undo-progress{height:3px;background:rgba(255,255,255,0.15);border-radius:2px;position:absolute;bottom:0;left:0;right:0;border-radius:0 0 10px 10px;overflow:hidden;}
-  .undo-progress-bar{height:100%;background:var(--accent);transition:width linear;}
-
-  .state-box{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:3rem;text-align:center;}
-  .state-box h3{font-size:16px;color:var(--text);margin-bottom:8px;}
-  .state-box p{font-size:13px;line-height:1.6;color:var(--text2);}
   @media(max-width:700px){.stats{grid-template-columns:repeat(3,1fr);}.signal-card{grid-template-columns:1fr;}.signal-right{align-items:flex-start;flex-direction:row;}}
 </style>
 </head>
 <body>
 <div class="container">
+  <div class="demo-banner">&#9670; DEMO MODE — sample data for representational purposes only</div>
   <div class="header">
     <div>
       <div class="logo">Thread<span>Keep</span></div>
       <div class="tagline">keep every thread accountable</div>
     </div>
     <div class="header-right">
-      <div class="live-badge"><div class="live-dot"></div>live &middot; 2 min</div>
-      <button class="icon-btn" onclick="fetchData()">&#8635; refresh</button>
+      <div class="live-badge"><div class="live-dot"></div>demo</div>
       <button class="icon-btn" id="mark-all-btn" onclick="markAllClosed()">&#10003;&#10003; mark all done</button>
       <button class="icon-btn" id="privacy-btn" onclick="togglePrivacy()">&#128274; privacy</button>
       <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">&#9728; light</button>
-      <div class="last-updated" id="last-updated">&mdash;</div>
+      <div class="last-updated" id="last-updated">demo data</div>
     </div>
   </div>
 
   <div class="stats">
-    <div class="stat stat-wrap">
-      <div class="tooltip">Every work signal extracted from Gmail,<br/>Slack &amp; WhatsApp — tasks, decisions,<br/>meetings, blockers, FYIs combined.</div>
-      <div class="stat-label">total signals <button class="info-btn">i</button></div>
-      <div class="stat-value" id="s-total">&mdash;</div><div class="stat-sub">active, all channels</div>
+    <div class="stat">
+      <div class="stat-label">total signals</div>
+      <div class="stat-value" id="s-total">—</div>
+      <div class="stat-sub">active, all channels</div>
     </div>
-    <div class="stat stat-wrap">
-      <div class="tooltip">Messages where someone was asked<br/>to DO something — with a clear<br/>action item and often a deadline.</div>
-      <div class="stat-label">open tasks <button class="info-btn">i</button></div>
-      <div class="stat-value" id="s-tasks">&mdash;</div><div class="stat-sub">need action</div>
+    <div class="stat">
+      <div class="stat-label">open tasks</div>
+      <div class="stat-value" id="s-tasks">—</div>
+      <div class="stat-sub">need action</div>
     </div>
-    <div class="stat stat-wrap">
-      <div class="tooltip">Signals marked HIGH priority — usually<br/>contain words like urgent, ASAP,<br/>EOD, jaldi, or today.</div>
-      <div class="stat-label">high priority <button class="info-btn">i</button></div>
-      <div class="stat-value" id="s-high">&mdash;</div><div class="stat-sub">urgent items</div>
+    <div class="stat">
+      <div class="stat-label">high priority</div>
+      <div class="stat-value" id="s-high">—</div>
+      <div class="stat-sub">urgent items</div>
     </div>
-    <div class="stat stat-wrap">
-      <div class="tooltip">Something is actively BLOCKING work<br/>from moving forward — missing access,<br/>waiting on someone, stuck.</div>
-      <div class="stat-label">blockers <button class="info-btn">i</button></div>
-      <div class="stat-value" id="s-blockers">&mdash;</div><div class="stat-sub">need resolution</div>
+    <div class="stat">
+      <div class="stat-label">blockers</div>
+      <div class="stat-value" id="s-blockers">—</div>
+      <div class="stat-sub">need resolution</div>
     </div>
-    <div class="stat stat-closed stat-wrap">
-      <div class="tooltip">Signals you have manually marked<br/>as done. They are hidden from<br/>the main view by default.</div>
-      <div class="stat-label">closed <button class="info-btn">i</button></div>
-      <div class="stat-value" id="s-closed">0</div><div class="stat-sub">resolved signals</div>
+    <div class="stat stat-closed">
+      <div class="stat-label">closed</div>
+      <div class="stat-value" id="s-closed">0</div>
+      <div class="stat-sub">resolved signals</div>
     </div>
   </div>
 
@@ -192,72 +179,39 @@
   </div>
 
   <div class="count-bar">
-    <div class="count-label" id="count-label">connecting...</div>
+    <div class="count-label" id="count-label"></div>
   </div>
 
-  <div class="signals" id="signals">
-    <div class="state-box">
-      <h3>connecting to ThreadKeep...</h3>
-      <p>Make sure n8n is running on your laptop.</p>
-    </div>
-  </div>
+  <div class="signals" id="signals"></div>
 </div>
 
 <script>
-var allData = [];
+var DEMO_DATA = [
+  { _id:'d1', type:'TASK', summary:'Send the Q2 performance deck to Ananya before EOD', person:'Ananya', deadline:'Today at 6 PM', priority:'high', confidence:'high', source:'whatsapp', sender:'Rahul', timestamp:'02 May 2026, 9:14 AM IST' },
+  { _id:'d2', type:'BLOCKER', summary:'API credentials for Razorpay not shared yet — integration blocked', person:'Vikram', deadline:'Today', priority:'high', confidence:'high', source:'slack', sender:'Priya Sharma', timestamp:'02 May 2026, 10:02 AM IST' },
+  { _id:'d3', type:'MEETING', summary:'Product review call with the design team at 4 PM', person:'unspecified', deadline:'Today at 4 PM', priority:'high', confidence:'high', source:'Gmail (work)', sender:'Neha Kulkarni', timestamp:'02 May 2026, 8:30 AM IST' },
+  { _id:'d4', type:'COMMITMENT', summary:'Rohit will send the revised vendor contract by Thursday', person:'Rohit', deadline:'Thursday', priority:'medium', confidence:'high', source:'whatsapp', sender:'Rohit Mehta', timestamp:'01 May 2026, 6:45 PM IST' },
+  { _id:'d5', type:'DECISION', summary:'Going ahead with AWS Mumbai region for hosting — final call', person:'unspecified', deadline:'not mentioned', priority:'medium', confidence:'high', source:'slack', sender:'Arjun Nair', timestamp:'01 May 2026, 3:20 PM IST' },
+  { _id:'d6', type:'TASK', summary:'Share onboarding doc link with the 3 new interns joining Monday', person:'unspecified', deadline:'Friday', priority:'medium', confidence:'high', source:'Gmail (work)', sender:'HR Team', timestamp:'01 May 2026, 2:15 PM IST' },
+  { _id:'d7', type:'FYI', summary:'Client moved the go-live date from May 15 to May 22', person:'unspecified', deadline:'not mentioned', priority:'low', confidence:'high', source:'whatsapp', sender:'Sneha Joshi', timestamp:'01 May 2026, 11:30 AM IST' },
+  { _id:'d8', type:'TASK', summary:'Review and approve the marketing budget proposal — needs sign-off', person:'unspecified', deadline:'Tomorrow', priority:'high', confidence:'medium', source:'Gmail (work)', sender:'Kiran Desai', timestamp:'30 Apr 2026, 5:55 PM IST' },
+  { _id:'d9', type:'COMMITMENT', summary:'Main le leta hoon presentation deck ka kaam — Siddharth', person:'Siddharth', deadline:'Wednesday', priority:'medium', confidence:'high', source:'whatsapp', sender:'Siddharth', timestamp:'30 Apr 2026, 4:10 PM IST' },
+  { _id:'d10', type:'MEETING', summary:'Weekly standup rescheduled to 10 AM on Friday', person:'unspecified', deadline:'Friday at 10 AM', priority:'low', confidence:'high', source:'slack', sender:'Priya Sharma', timestamp:'30 Apr 2026, 9:00 AM IST' },
+  { _id:'d11', type:'TASK', summary:'Upload signed NDA to the shared Drive folder before the client call', person:'unspecified', deadline:'Tomorrow', priority:'high', confidence:'high', source:'Gmail (work)', sender:'Legal Team', timestamp:'29 Apr 2026, 7:30 PM IST' },
+  { _id:'d12', type:'FYI', summary:'Office will be closed on May 5 for local holiday — plan accordingly', person:'unspecified', deadline:'not mentioned', priority:'low', confidence:'high', source:'whatsapp', sender:'Admin', timestamp:'29 Apr 2026, 3:00 PM IST' },
+];
+
+var allData = DEMO_DATA;
 var activeFilter = 'ALL';
-var N8N_URL = 'https://n8n-production-2506.up.railway.app/webhook/threadkeep-data';
-var N8N_STATUS_URL = 'https://n8n-production-2506.up.railway.app/webhook/threadkeep-status';
-var autoRefreshInterval = null;
 var privacyOn = false;
 var theme = 'dark';
 var showClosed = false;
 var closedIds = {};
+var undoSnapshot = null;
+var undoTimer = null;
+var undoProgressTimer = null;
 
-fetchData();
-startAutoRefresh();
-
-function startAutoRefresh() {
-  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-  autoRefreshInterval = setInterval(fetchData, 120000);
-}
-
-function fetchData() {
-  document.getElementById('count-label').textContent = 'fetching...';
-  fetch(N8N_URL)
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(data) {
-      var rows = Array.isArray(data) ? data : [];
-      allData = rows.map(function(row, idx) {
-        var sheetId = (row.ID || '').trim();
-        var id = sheetId || ('sig' + idx); // fallback for old rows without ID
-        var status = (row.Status || '').toLowerCase().trim();
-        if (status === 'closed') closedIds[id] = true;
-        return {
-          _id: id,
-          type: (row.Type || '').toUpperCase(),
-          summary: row.Summary || '',
-          person: row.Person || 'unspecified',
-          deadline: row.Deadline || null,
-          priority: (row.Priority || 'low').toLowerCase(),
-          confidence: (row.Confidence || 'low').toLowerCase(),
-          source: row.Source || 'unknown',
-          sender: row.Sender || 'unknown',
-          timestamp: row.Timestamp || ''
-        };
-      }).filter(function(d) { return d.type && d.summary; });
-      var now = new Date();
-      document.getElementById('last-updated').textContent = 'updated ' + now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-      render();
-    })
-    .catch(function(err) {
-      document.getElementById('signals').innerHTML = '<div class="state-box"><h3>could not connect</h3><p>Make sure n8n is running and the workflow is active.<br/><br/><small style="color:var(--muted)">' + err.message + '</small></p></div>';
-      document.getElementById('count-label').textContent = 'connection error';
-    });
-}
+render();
 
 function toggleTheme() {
   theme = theme === 'dark' ? 'light' : 'dark';
@@ -274,17 +228,8 @@ function togglePrivacy() {
 }
 
 function toggleClose(id) {
-  var newStatus = closedIds[id] ? 'open' : 'closed';
   closedIds[id] = !closedIds[id];
   render();
-  // Sync to Google Sheets via n8n
-  fetch(N8N_STATUS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: id, status: newStatus })
-  }).catch(function(err) {
-    console.warn('Status sync failed:', err);
-  });
 }
 
 function toggleShowClosed(btn) {
@@ -304,52 +249,57 @@ function getSourceClass(src) {
   if (!src) return 'src-whatsapp';
   var s = src.toLowerCase();
   if (s.includes('slack')) return 'src-slack';
-  if (s.includes('gmail') || s.includes('mail') || s.includes('@')) return 'src-gmail';
+  if (s.includes('gmail') || s.includes('mail')) return 'src-gmail';
   return 'src-whatsapp';
 }
 
-function formatDeadline(raw) {
-  if (!raw) return raw;
-  var s = raw.toLowerCase().trim();
-  if (s === 'not mentioned' || s === 'null' || s === '') return null;
-  if (s.startsWith('today')) { var t = extractTime(raw); return 'Today' + (t ? ' at ' + t : ''); }
-  if (s.startsWith('tomorrow')) { var t = extractTime(raw); return 'Tomorrow' + (t ? ' at ' + t : ''); }
-  var d = new Date(raw);
-  if (isNaN(d.getTime())) return raw;
-  var now = new Date();
-  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  var tomorrowStart = new Date(todayStart.getTime() + 86400000);
-  var dStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
-  var timeStr = hasTime ? ' at ' + fmtTime(d) : '';
-  if (dStart.getTime() === todayStart.getTime()) return 'Today' + timeStr;
-  if (dStart.getTime() === tomorrowStart.getTime()) return 'Tomorrow' + timeStr;
-  var diff = (dStart.getTime() - todayStart.getTime()) / 86400000;
-  if (diff > 0 && diff <= 6) return days[d.getDay()] + timeStr;
-  return d.getDate() + ' ' + months[d.getMonth()] + timeStr;
+function markAllClosed() {
+  var activeData = allData.filter(function(d) { return !closedIds[d._id]; });
+  if (activeData.length === 0) return;
+  undoSnapshot = JSON.parse(JSON.stringify(closedIds));
+  activeData.forEach(function(d) { closedIds[d._id] = true; });
+  render();
+  showUndoBanner(activeData.length);
 }
 
-function extractTime(str) {
-  var m = str.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)/i);
-  if (!m) return null;
-  var h = parseInt(m[1]);
-  var mins = m[2] ? ':' + m[2] : '';
-  return h + mins + ' ' + m[3].toUpperCase();
+function showUndoBanner(count) {
+  var old = document.getElementById('undo-banner');
+  if (old) old.remove();
+  if (undoTimer) clearTimeout(undoTimer);
+  if (undoProgressTimer) clearInterval(undoProgressTimer);
+  var banner = document.createElement('div');
+  banner.className = 'undo-banner';
+  banner.id = 'undo-banner';
+  banner.style.position = 'fixed';
+  banner.innerHTML = '<span>' + count + ' signals marked done</span><button class="undo-btn" onclick="undoMarkAll()">Undo</button><div class="undo-progress"><div class="undo-progress-bar" id="undo-bar" style="width:100%"></div></div>';
+  document.body.appendChild(banner);
+  var start = Date.now();
+  var duration = 10000;
+  undoProgressTimer = setInterval(function() {
+    var pct = Math.max(0, 100 - ((Date.now() - start) / duration * 100));
+    var bar = document.getElementById('undo-bar');
+    if (bar) bar.style.width = pct + '%';
+    if (Date.now() - start >= duration) clearInterval(undoProgressTimer);
+  }, 50);
+  undoTimer = setTimeout(function() {
+    var b = document.getElementById('undo-banner');
+    if (b) b.remove();
+    undoSnapshot = null;
+  }, duration);
 }
 
-function fmtTime(d) {
-  var h = d.getHours(); var m = d.getMinutes();
-  var ampm = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  return h + (m > 0 ? ':' + String(m).padStart(2,'0') : '') + ' ' + ampm;
+function undoMarkAll() {
+  if (undoSnapshot !== null) { closedIds = undoSnapshot; undoSnapshot = null; }
+  if (undoTimer) clearTimeout(undoTimer);
+  if (undoProgressTimer) clearInterval(undoProgressTimer);
+  var b = document.getElementById('undo-banner');
+  if (b) b.remove();
+  render();
 }
 
 function render() {
   var search = (document.getElementById('search').value || '').toLowerCase();
   var activeData = allData.filter(function(d) { return !closedIds[d._id]; });
-
   document.getElementById('s-total').textContent = activeData.length;
   document.getElementById('s-tasks').textContent = activeData.filter(function(d){return d.type==='TASK';}).length;
   document.getElementById('s-high').textContent = activeData.filter(function(d){return d.priority==='high';}).length;
@@ -357,14 +307,9 @@ function render() {
   document.getElementById('s-closed').textContent = allData.filter(function(d){return closedIds[d._id];}).length;
 
   var filtered = allData.filter(function(d) {
-    var isClosed = closedIds[d._id];
-    if (isClosed && !showClosed) return false;
+    if (closedIds[d._id] && !showClosed) return false;
     var matchType = activeFilter === 'ALL' || d.type === activeFilter;
-    var matchSearch = !search ||
-      d.summary.toLowerCase().includes(search) ||
-      (d.person && d.person.toLowerCase().includes(search)) ||
-      (d.sender && d.sender.toLowerCase().includes(search)) ||
-      (d.source && d.source.toLowerCase().includes(search));
+    var matchSearch = !search || d.summary.toLowerCase().includes(search) || (d.person && d.person.toLowerCase().includes(search)) || (d.sender && d.sender.toLowerCase().includes(search));
     return matchType && matchSearch;
   });
 
@@ -376,118 +321,30 @@ function render() {
   }
 
   var html = '';
-  filtered.slice().reverse().forEach(function(d, i) {
+  filtered.forEach(function(d, i) {
     var isClosed = !!closedIds[d._id];
     var srcClass = getSourceClass(d.source);
-    var dl = d.deadline && d.deadline !== 'not mentioned' && d.deadline !== 'null' && d.deadline !== '' ? formatDeadline(d.deadline) : null;
+    var dl = d.deadline && d.deadline !== 'not mentioned' && d.deadline !== '' ? d.deadline : null;
     var delay = Math.min(i * 0.025, 0.25);
-    var cardCls = 'signal-card' + (isClosed ? ' closed' : '');
-    var btnCls = 'check-btn' + (isClosed ? ' checked' : '');
-    var btnIcon = isClosed ? '&#10003;' : '';
-    var btnTitle = isClosed ? 'Reopen' : 'Mark as done';
-
-    html += '<div class="' + cardCls + '" style="animation-delay:' + delay + 's">';
+    html += '<div class="signal-card' + (isClosed ? ' closed' : '') + '" style="animation-delay:' + delay + 's">';
     html += '<div class="signal-left">';
     html += '<span class="type-badge type-' + d.type + '">' + d.type + '</span>';
     html += '<span class="priority-badge"><span class="priority-dot p-' + d.priority + '"></span>' + d.priority + '</span>';
-    html += '<button class="' + btnCls + '" onclick="toggleClose(\'' + d._id + '\')" title="' + btnTitle + '">' + btnIcon + '</button>';
+    html += '<button class="check-btn' + (isClosed ? ' checked' : '') + '" onclick="toggleClose(\'' + d._id + '\')">' + (isClosed ? '&#10003;' : '') + '</button>';
     html += '</div>';
     html += '<div class="signal-body">';
-    html += '<div class="signal-summary">' + escHtml(d.summary) + '</div>';
+    html += '<div class="signal-summary">' + d.summary + '</div>';
     html += '<div class="signal-meta">';
-    if (d.sender && d.sender !== 'unknown') html += '<span class="capsule capsule-from"><span class="capsule-label">FROM</span><span class="capsule-val">' + escHtml(d.sender) + '</span></span>';
-    if (d.person && d.person !== 'unspecified') html += '<span class="capsule capsule-for"><span class="capsule-label">FOR</span><span class="capsule-val">' + escHtml(d.person) + '</span></span>';
-    if (dl) html += '<span class="capsule capsule-due"><span class="capsule-label">DUE</span><span class="capsule-val">' + escHtml(dl) + '</span></span>';
+    if (d.sender && d.sender !== 'unknown') html += '<span class="capsule capsule-from"><span class="capsule-label">FROM</span><span class="capsule-val">' + d.sender + '</span></span>';
+    if (d.person && d.person !== 'unspecified') html += '<span class="capsule capsule-for"><span class="capsule-label">FOR</span><span class="capsule-val">' + d.person + '</span></span>';
+    if (dl) html += '<span class="capsule capsule-due"><span class="capsule-label">DUE</span><span class="capsule-val">' + dl + '</span></span>';
     html += '</div></div>';
     html += '<div class="signal-right">';
-    html += '<span class="source-badge ' + srcClass + '">' + escHtml(d.source) + '</span>';
-    if (d.timestamp) html += '<span class="timestamp">' + escHtml(d.timestamp) + '</span>';
+    html += '<span class="source-badge ' + srcClass + '">' + d.source + '</span>';
+    if (d.timestamp) html += '<span class="timestamp">' + d.timestamp + '</span>';
     html += '</div></div>';
   });
   document.getElementById('signals').innerHTML = html;
-}
-
-var undoTimer = null;
-var undoSnapshot = null;
-var undoProgressTimer = null;
-
-function markAllClosed() {
-  var activeData = allData.filter(function(d) { return !closedIds[d._id]; });
-  if (activeData.length === 0) return;
-
-  // Save snapshot for undo
-  undoSnapshot = JSON.parse(JSON.stringify(closedIds));
-
-  // Close all active
-  activeData.forEach(function(d) { closedIds[d._id] = true; });
-  render();
-
-  // Sync all to Sheets
-  activeData.forEach(function(d) {
-    fetch(N8N_STATUS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: d._id, status: 'closed' })
-    }).catch(function(err) { console.warn('Status sync failed:', err); });
-  });
-
-  // Show undo banner
-  showUndoBanner(activeData.length);
-}
-
-function showUndoBanner(count) {
-  // Remove existing banner if any
-  var old = document.getElementById('undo-banner');
-  if (old) old.remove();
-  if (undoTimer) clearTimeout(undoTimer);
-  if (undoProgressTimer) clearInterval(undoProgressTimer);
-
-  var banner = document.createElement('div');
-  banner.className = 'undo-banner';
-  banner.id = 'undo-banner';
-  banner.innerHTML = '<span>' + count + ' signals marked done</span><button class="undo-btn" onclick="undoMarkAll()">Undo</button><div class="undo-progress"><div class="undo-progress-bar" id="undo-bar" style="width:100%"></div></div>';
-  document.body.appendChild(banner);
-
-  // Animate progress bar over 10 seconds
-  var start = Date.now();
-  var duration = 10000;
-  undoProgressTimer = setInterval(function() {
-    var elapsed = Date.now() - start;
-    var pct = Math.max(0, 100 - (elapsed / duration * 100));
-    var bar = document.getElementById('undo-bar');
-    if (bar) bar.style.width = pct + '%';
-    if (elapsed >= duration) clearInterval(undoProgressTimer);
-  }, 50);
-
-  // Auto-dismiss after 10 seconds
-  undoTimer = setTimeout(function() {
-    var b = document.getElementById('undo-banner');
-    if (b) b.remove();
-    undoSnapshot = null;
-  }, duration);
-}
-
-function undoMarkAll() {
-  if (undoSnapshot !== null) {
-    // Find which IDs were just closed (not in old snapshot) — reopen them
-    var prevSnapshot = undoSnapshot;
-    Object.keys(closedIds).forEach(function(id) {
-      if (closedIds[id] && !prevSnapshot[id]) {
-        fetch(N8N_STATUS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: id, status: 'open' })
-        }).catch(function(err) { console.warn('Status sync failed:', err); });
-      }
-    });
-    closedIds = prevSnapshot;
-    undoSnapshot = null;
-  }
-  if (undoTimer) clearTimeout(undoTimer);
-  if (undoProgressTimer) clearInterval(undoProgressTimer);
-  var b = document.getElementById('undo-banner');
-  if (b) b.remove();
-  render();
 }
 
 function escHtml(str) {
