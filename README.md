@@ -22,7 +22,7 @@ ThreadKeep is an AI-powered work signal extraction engine that monitors Gmail, S
 
 ## The Problem
 
-Indian professionals use personal WhatsApp + Gmail + Slack simultaneously for work. Critical tasks, decisions, and commitments get buried in chats. **"Maine kab bola?"** (when did I say that?) is the escalation moment ThreadKeep prevents.
+Indian professionals coordinate work across WhatsApp, Gmail, and Slack simultaneously — leaving tasks, decisions, and commitments scattered across platforms with no unified record. When accountability questions arise, retrieval becomes impossible. ThreadKeep eliminates this gap by extracting and structuring every work signal across channels in real time.
 
 ---
 
