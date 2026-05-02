@@ -8,11 +8,12 @@ ThreadKeep is an AI-powered work signal extraction engine that monitors Gmail, S
 
 ## Dashboard
 
+![N8N Workflow](./Assets/n8n-workflow.png)
+
 ![ThreadKeep Light Mode](./Assets/image.png)
 
 ![ThreadKeep Dark Mode](./Assets/dark-mode.webp)
 
-![N8N Workflow](./Assets/n8n-workflow.png)
 ---
 
 ## The Problem
