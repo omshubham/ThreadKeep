@@ -107,7 +107,7 @@ Webhook POST /threadkeep-status ──► Update Sheet row ──► Respond
 
 | Service | Platform | URL |
 |---|---|---|
-| n8n | Railway | n8n-production-2506.up.railway.app |
+| n8n | Railway | https://railway.com/ |
 | Dashboard | GitHub Pages | YOUR-USERNAME.github.io/threadkeep-dashboard |
 | Database | Google Sheets | ThreadKeep Dashboard (Sheet1) |
-| WhatsApp API | GREEN-API | Instance 7107607123 |
+| WhatsApp API | GREEN-API | https://green-api.com/ |
