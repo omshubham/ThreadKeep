@@ -102,5 +102,4 @@ omshubham99@gmail.com
 
 ## Status
 
-🟢 MVP Live — Phase 0 (Validation)
-Target: 10 test users by June 2026
+🟢 MVP Live — For Demo Project
