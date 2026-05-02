@@ -6,6 +6,16 @@ ThreadKeep is an AI-powered work signal extraction engine that monitors Gmail, S
 
 ---
 
+## Dashboard
+
+![ThreadKeep Light Mode](./docs/light-mode.png)
+
+![ThreadKeep Dark Mode](./docs/dark-mode.png)
+
+![ThreadKeep Task Filter with Closed Signals](./docs/filter-task-closed-open.png)
+
+---
+
 ## The Problem
 
 Indian professionals use personal WhatsApp + Gmail + Slack simultaneously for work. Critical tasks, decisions, and commitments get buried in chats. **"Maine kab bola?"** (when did I say that?) is the escalation moment ThreadKeep prevents.
@@ -29,13 +39,13 @@ WhatsApp (via GREEN-API forwarding) ────────────┘
 
 ## Features
 
-- ✅ Multi-source ingestion (Gmail × 2, Slack, WhatsApp)
-- ✅ AI signal extraction (Tasks, Decisions, Commitments, Blockers, Meetings, FYIs)
-- ✅ Hinglish understanding ("kal tak bhej dena" → deadline: tomorrow)
+- ✅ Multi-source ingestion — Gmail × 2, Slack, WhatsApp
+- ✅ AI signal extraction — Tasks, Decisions, Commitments, Blockers, Meetings, FYIs
+- ✅ Hinglish understanding — "kal tak bhej dena" → deadline: tomorrow
 - ✅ Live dashboard with filters, search, dark/light mode, privacy mode
 - ✅ Signal close/open with Google Sheets sync
 - ✅ SimSim WhatsApp command → instant status report
-- ✅ Deployed on Railway (24/7 uptime)
+- ✅ Deployed on Railway — 24/7 uptime
 
 ---
 
@@ -64,7 +74,10 @@ threadkeep/
 ├── SETUP.md                # Full technical setup guide
 ├── .gitignore              # Files to exclude
 └── docs/
-    └── architecture.md     # System architecture notes
+    ├── architecture.md     # System architecture notes
+    ├── dark-mode.png       # Dashboard screenshot — dark
+    ├── light-mode.png      # Dashboard screenshot — light
+    └── filter-task-closed-open.png  # Dashboard screenshot — filters
 ```
 
 ---
