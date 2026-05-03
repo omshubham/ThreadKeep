@@ -1,0 +1,940 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $json.body.event.user }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        0,
+        176
+      ],
+      "id": "00000000-0000-0000-0000-000000000006",
+      "name": "Get information about a user",
+      "webhookId": "YOUR_WEBHOOK_UUID",
+      "credentials": {
+        "slackApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -176
+      ],
+      "id": "00000000-0000-0000-0000-000000000017",
+      "name": "your_work_account",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -352
+      ],
+      "id": "00000000-0000-0000-0000-000000000013",
+      "name": "your_personal_account@gmail",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "threadkeep-whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        0
+      ],
+      "id": "00000000-0000-0000-0000-000000000001",
+      "name": "Whatsapp",
+      "webhookId": "YOUR_WEBHOOK_UUID"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slack-threadkeep",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "00000000-0000-0000-0000-000000000012",
+      "name": "Slack",
+      "webhookId": "YOUR_WEBHOOK_UUID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_ANTHROPIC_API_KEY"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 300,\n  \"system\": \"You are ThreadKeep, an intelligent work conversation analyst for Indian professionals. Your job: Analyse any work message and extract ALL meaningful work signals. Handle Hinglish, informal language, abbreviations, and voice note transcriptions naturally.\\n\\nClassify every message into one or more of these types:\\n- TASK: Something that needs to be done\\n- DECISION: Something agreed upon or finalised\\n- COMMITMENT: Someone personally promising to do something\\n- BLOCKER: Something stopping progress\\n- MEETING: A meeting or sync being scheduled\\n- FYI: Important information to remember\\n\\nAlways respond with ONLY a JSON object. No explanation. No extra text.\\n\\nIMPORTANT SOURCE RULES:\\n- Every message starts with a source prefix like: 'slack | sender: Name | message: ...' or 'Gmail (your_personal_account) | sender: Name | message: ...' or 'Gmail (your.email@example.com) | sender: Name | message: ...' or 'whatsapp | message: ...'\\n- For Gmail messages: use the EXACT source label from the prefix (e.g. 'Gmail (your_personal_account)' or 'Gmail (your.email@example.com)') as the source field\\n- For Slack messages: use 'slack' as source\\n- For WhatsApp messages: use 'whatsapp' as source\\n- Extract the sender name from the prefix for original_sender field\\n\\nReturn this structure:\\n{\\n  signals: [\\n    {\\n      type: TASK|DECISION|COMMITMENT|BLOCKER|MEETING|FYI,\\n      summary: clear 1 line summary in English,\\n      person: name or unspecified,\\n      deadline: date/time or null,\\n      priority: high|medium|low,\\n      confidence: high|medium|low\\n    }\\n  ],\\n  source: use exact source label from prefix,\\n  original_sender: name or null\\n}\\n\\nHinglish rules: kal tak = by tomorrow, aaj EOD = by end of today, jaldi = urgent, main le leta hoon = commitment, ho jayega = will be done, ruk gaya hai = blocker.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ \n  ($json.real_name ? 'slack | sender: ' + $json.real_name + ' | message: ' + $('Slack').item.json.body.event.text \n  : ($json.snippet ? $json.source_label + ' | sender: ' + ($json.From ? $json.From.replace(/<.*>/g, '').trim() : 'unknown') + ' | message: ' + $json.snippet \n  : 'whatsapp | sender: ' + $json.body.senderData.senderName + ' | message: ' + $json.body.messageData.textMessageData.textMessage)) \n}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        16
+      ],
+      "id": "00000000-0000-0000-0000-000000000007",
+      "name": "Claude LLM"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Step 1: Get Claude's raw response text\nconst rawText = $input.first().json.content[0].text;\n\n// Step 2: Strip the ```json ``` backticks Claude adds\nconst cleanText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n\n// Step 3: Parse it into real JSON\nconst parsed = JSON.parse(cleanText);\n\n// Step 4: Create IST timestamp\nconst now = new Date();\nconst istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));\nconst day = istTime.getUTCDate().toString().padStart(2, '0');\nconst months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];\nconst month = months[istTime.getUTCMonth()];\nconst year = istTime.getUTCFullYear();\nlet hours = istTime.getUTCHours();\nconst minutes = istTime.getUTCMinutes().toString().padStart(2, '0');\nconst ampm = hours >= 12 ? 'PM' : 'AM';\nhours = hours % 12 || 12;\nconst timestamp = `${day} ${month} ${year}, ${hours}:${minutes} ${ampm} IST`;\n\n// Step 5: Loop through each signal and create one output row per signal\nconst rows = parsed.signals.map(signal => {\n  return {\n    json: {\n      type: signal.type,\n      summary: signal.summary,\n      person: signal.person || 'unspecified',\n      deadline: signal.deadline || 'not mentioned',\n      priority: signal.priority,\n      confidence: signal.confidence,\n      source: parsed.source || 'whatsapp',\n      original_sender: parsed.original_sender || 'unknown',\n      timestamp: timestamp,\n      status: 'open',           \n      id: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,         function(c) {\n      var r = Math.random() * 16 | 0;\n      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);\n      })\n    }\n  };\n});\n\n// Step 6: Return all rows\nreturn rows;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        16
+      ],
+      "id": "00000000-0000-0000-0000-000000000008",
+      "name": "Structure Data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "ThreadKeep Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Type": "={{ $json.type }}",
+            "Summary": "={{ $json.summary }}",
+            "Person": "={{ $json.person }}",
+            "Deadline": "={{ $json.deadline }}",
+            "Confidence": "={{ $json.confidence }}",
+            "Priority": "={{ $json.priority }}",
+            "Source": "={{ $json.source }}",
+            "Sender": "={{ $json.original_sender }}",
+            "Timestamp": "={{ $json.timestamp }}",
+            "Status": "={{ $json.status }}",
+            "ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Person",
+              "displayName": "Person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confidence",
+              "displayName": "Confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        16
+      ],
+      "id": "00000000-0000-0000-0000-000000000015",
+      "name": "Add Info in Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-0000-0000-000000000004",
+              "name": "source_label",
+              "value": "Gmail (your_personal_account)",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -352
+      ],
+      "id": "00000000-0000-0000-0000-000000000018",
+      "name": "Set Gmail Label"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-0000-0000-000000000004",
+              "name": "source_label",
+              "value": "Gmail (your_work_account)",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -176
+      ],
+      "id": "00000000-0000-0000-0000-000000000016",
+      "name": "Set Gmail Label2"
+    },
+    {
+      "parameters": {
+        "path": "threadkeep-data",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        -192
+      ],
+      "id": "00000000-0000-0000-0000-000000000009",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_UUID"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "ThreadKeep Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -192
+      ],
+      "id": "00000000-0000-0000-0000-000000000003",
+      "name": "Final Task Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        688,
+        -192
+      ],
+      "id": "00000000-0000-0000-0000-000000000022",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "threadkeep-status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        240
+      ],
+      "id": "00000000-0000-0000-0000-000000000002",
+      "name": "Update Task  status",
+      "webhookId": "YOUR_WEBHOOK_UUID"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "ThreadKeep Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.body.id }}",
+            "Status": "={{ $json.body.status }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Person",
+              "displayName": "Person",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confidence",
+              "displayName": "Confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender",
+              "displayName": "Sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        240
+      ],
+      "id": "00000000-0000-0000-0000-000000000020",
+      "name": "Final Task Database1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        688,
+        240
+      ],
+      "id": "00000000-0000-0000-0000-000000000011",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "00000000-0000-0000-0000-000000000005",
+              "leftValue": "={{ $json.body.messageData.textMessageData.textMessage.toLowerCase() }}",
+              "rightValue": "simsim",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "00000000-0000-0000-0000-000000000021",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "ThreadKeep Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "open"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        288,
+        -352
+      ],
+      "id": "00000000-0000-0000-0000-000000000019",
+      "name": "Fetch From Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\nif (rows.length === 0) {\n  return [{ json: { message: \"✅ All clear! No open signals right now.\" } }];\n}\n\n// Group by type\nconst groups = {};\nrows.forEach(row => {\n  const type = row.json.Type || 'OTHER';\n  if (!groups[type]) groups[type] = [];\n  groups[type].push(row.json);\n});\n\nconst typeEmoji = {\n  TASK: '📋',\n  MEETING: '📅',\n  DECISION: '✅',\n  COMMITMENT: '🤝',\n  BLOCKER: '⚠️',\n  FYI: 'ℹ️'\n};\n\nlet message = `🧵 *ThreadKeep Status*\\n`;\nmessage += `_${rows.length} open signals_\\n\\n`;\n\nObject.keys(groups).forEach(type => {\n  const emoji = typeEmoji[type] || '•';\n  message += `${emoji} *${type}* (${groups[type].length})\\n`;\n  groups[type].forEach(row => {\n    const person = row.Person && row.Person !== 'unspecified' ? ` → ${row.Person}` : '';\n    const due = row.Deadline && row.Deadline !== 'not mentioned' ? ` | Due: ${row.Deadline}` : '';\n    message += `• ${row.Summary}${person}${due}\\n`;\n  });\n  message += '\\n';\n});\n\nmessage += `_ThreadKeep · ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} IST_`;\n\nreturn [{ json: { message: message } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -352
+      ],
+      "id": "00000000-0000-0000-0000-000000000010",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_INSTANCE.api.greenapi.com/waInstanceYOUR_ID/sendMessage/YOUR_GREENAPI_TOKEN",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chatId",
+              "value": "YOUR_PHONE_NUMBER@c.us"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        704,
+        -352
+      ],
+      "id": "00000000-0000-0000-0000-000000000014",
+      "name": "Ask Green-API to send"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get information about a user": {
+      "main": [
+        [
+          {
+            "node": "Claude LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "your_work_account": {
+      "main": [
+        [
+          {
+            "node": "Set Gmail Label2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whatsapp": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack": {
+      "main": [
+        [
+          {
+            "node": "Get information about a user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude LLM": {
+      "main": [
+        [
+          {
+            "node": "Structure Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Data": {
+      "main": [
+        [
+          {
+            "node": "Add Info in Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "your_personal_account@gmail": {
+      "main": [
+        [
+          {
+            "node": "Set Gmail Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Gmail Label": {
+      "main": [
+        [
+          {
+            "node": "Claude LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Gmail Label2": {
+      "main": [
+        [
+          {
+            "node": "Claude LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Info in Sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Final Task Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Task Database": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Task  status": {
+      "main": [
+        [
+          {
+            "node": "Final Task Database1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Task Database1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Fetch From Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Claude LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch From Database": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Ask Green-API to send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "YOUR_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCEID"
+  },
+  "id": "YOUR_WORKFLOW_ID",
+  "tags": []
+}
